@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organização de Syllas Gabriel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <span class="badge">ORGANIZAÇÃO</span>
+      <h1>Organização de Syllas Gabriel</h1>
+      <p>Pagamentos, metas, gastos e dias trabalhados em um só lugar.</p>
+    </div>
+    <button id="themeButton">🌙 Tema</button>
+  </header>
+
+  <main>
+    <section class="summary">
+      <div class="summary-card"><span>Pagamentos do mês</span><strong id="monthlyPayments">R$ 0,00</strong></div>
+      <div class="summary-card"><span>Gastos do mês</span><strong id="extraTotal">R$ 0,00</strong></div>
+      <div class="summary-card"><span>Trabalho acumulado</span><strong id="workTotal">R$ 0,00</strong></div>
+      <div class="summary-card"><span>Caixinha Nubank</span><strong id="bikeProgress">R$ 0,00 / R$ 20.000,00</strong></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <span class="eyebrow">CONTAS</span>
+          <h2>Pagamentos mensais</h2>
+        </div>
+        <span id="paymentMonth"></span>
+      </div>
+      <div id="payments" class="payments"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <span class="eyebrow">METAS</span>
+          <h2>Juntando / Aguardando comprar</h2>
+        </div>
+      </div>
+      <div id="goals" class="goals"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <span class="eyebrow">GASTOS</span>
+          <h2 id="expensesTitle">Gastos do mês</h2>
+        </div>
+        <div class="month-nav">
+          <button id="prevExpenseMonth">‹</button>
+          <strong id="expenseMonthLabel"></strong>
+          <button id="nextExpenseMonth">›</button>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <input id="expenseName" type="text" placeholder="O que você gastou?">
+        <input id="expenseValue" type="number" min="0" step="0.01" placeholder="Valor (R$)">
+        <input id="expenseDate" type="date">
+        <button class="primary" id="addExpense">Adicionar gasto</button>
+      </div>
+
+      <div id="expenses"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <div>
+          <span class="eyebrow">TRABALHO</span>
+          <h2>Calendário de dias trabalhados</h2>
+        </div>
+        <div class="calendar-nav">
+          <button id="prevMonth">‹</button>
+          <strong id="calendarTitle"></strong>
+          <button id="nextMonth">›</button>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i class="work-dot"></i> Trabalhei</span>
+        <span>Seg–Sex: R$ 30</span>
+        <span>Sábado: R$ 50</span>
+        <span>Domingo: R$ 0</span>
+      </div>
+
+      <div id="calendar" class="calendar"></div>
+
+      <div class="work-table">
+        <div><span>Dias trabalhados</span><strong id="daysWorked">0</strong></div>
+        <div><span>Seg–Sex</span><strong id="weekdayTotal">R$ 0,00</strong></div>
+        <div><span>Sábados</span><strong id="saturdayTotal">R$ 0,00</strong></div>
+        <div class="highlight"><span>Total acumulado</span><strong id="calendarTotal">R$ 0,00</strong></div>
+      </div>
+      <p class="hint">Clique em um dia para marcar/desmarcar que você trabalhou. Os dados ficam salvos por mês.</p>
+
+      <button id="showMoreButton" class="show-more">Mostrar mais</button>
+    </section>
+
+    <div id="extraTabs" class="extra-tabs hidden">
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <span class="eyebrow">ORGANIZAÇÃO</span>
+            <h2>Lista de tarefas</h2>
+          </div>
+        </div>
+
+        <div class="task-form">
+          <input id="taskInput" type="text" placeholder="Ex.: Estudar para prova de matemática">
+          <button class="primary" id="addTask">Adicionar tarefa</button>
+        </div>
+
+        <div id="tasks" class="tasks"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <div>
+            <span class="eyebrow">FERRAMENTA</span>
+            <h2>Calculadora</h2>
+          </div>
+        </div>
+
+        <div class="calculator">
+          <input id="calcDisplay" class="calc-display" type="text" value="0" readonly>
+          <div class="calc-buttons">
+            <button data-calc="clear" class="calc-action">AC</button>
+            <button data-calc="backspace" class="calc-action">⌫</button>
+            <button data-calc="operator" data-value="%">%</button>
+            <button data-calc="operator" data-value="/">÷</button>
+
+            <button data-calc="number" data-value="7">7</button>
+            <button data-calc="number" data-value="8">8</button>
+            <button data-calc="number" data-value="9">9</button>
+            <button data-calc="operator" data-value="*">×</button>
+
+            <button data-calc="number" data-value="4">4</button>
+            <button data-calc="number" data-value="5">5</button>
+            <button data-calc="number" data-value="6">6</button>
+            <button data-calc="operator" data-value="-">−</button>
+
+            <button data-calc="number" data-value="1">1</button>
+            <button data-calc="number" data-value="2">2</button>
+            <button data-calc="number" data-value="3">3</button>
+            <button data-calc="operator" data-value="+">+</button>
+
+            <button data-calc="number" data-value="0" class="zero">0</button>
+            <button data-calc="decimal" data-value=".">.</button>
+            <button data-calc="equals">=</button>
+          </div>
+        </div>
+      </section>
+
+      <button id="showLessButton" class="show-more">Mostrar menos</button>
+    </div>
+  </main>
+
+  <footer>Site de Syllas Gabriel • Deus é o dono deste lugar • Seus dados ficam salvos neste navegador.</footer>
+  <script src="script.js"></script>
+</body>
+</html>
