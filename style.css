@@ -427,3 +427,25 @@ footer{
   .month-nav,.calendar-nav{width:100%;justify-content:space-between}
   .calc-buttons button{min-height:52px}
 }
+
+
+/* Bloco de notas */
+.note-form{display:grid;gap:10px}
+.note-form textarea{width:100%;resize:vertical;min-height:120px;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:8px;padding:12px;font:inherit}
+.notes{display:grid;gap:12px;margin-top:16px}
+.note-card{background:#21262d;border:1px solid #30363d;border-radius:10px;padding:16px;overflow-wrap:anywhere}
+.note-card h3{margin:0 0 8px;font-size:17px}
+.note-card p{white-space:normal;line-height:1.55;margin:0 0 14px;color:#c9d1d9}
+.note-actions{display:flex;gap:8px}
+.note-actions button{background:#30363d;color:#e6edf3}
+.note-actions .note-delete{background:#572b31;color:#ffd7dc}
+body.light .note-card{background:#fff;border-color:#d0d7de}
+body.light .note-card p{color:#344054}
+body.light .note-form textarea{background:#fff;color:#17202a;border-color:#c5cbd3}
+@media(max-width:520px){.task-form{grid-template-columns:1fr}.note-actions button{flex:1}}
+.task{display:flex;align-items:center;gap:10px}
+.task-text{flex:1;min-width:0}
+.task-check{flex:none}
+.task .task-delete{background:#572b31;color:#ffd7dc;padding:7px 11px;min-width:34px}
+.note-content.hidden{display:none}
+.note-actions button:first-child{background:#244b70;color:#eaf5ff}

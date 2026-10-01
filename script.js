@@ -3,7 +3,7 @@ const LEGACY_STORAGE_KEY = "organizacaoSyllasGabriel_v3";
 
 const defaultData = {
   payments: [
-    {id:"bike", name:"Bicicleta mensal", amount:200, remaining:7, due:"Dia 10 do próximo mês"},
+    {id:"bike", name:"Bicicleta mensal", amount:213, remaining:7, due:"Dia 10 do próximo mês"},
     {id:"bikeExtra", name:"Bicicleta — peça extra", amount:100, remaining:1, due:"Dia 10 do próximo mês"},
     {id:"ac", name:"Ar condicionado mensal", amount:112, remaining:9, due:"Dia 10 do próximo mês"},
     {id:"barber", name:"Barbearia mensal", amount:85, remaining:null, due:"Dia 22 deste mês"}
@@ -43,7 +43,8 @@ const defaultData = {
     "2026-09-19":true,
     "2026-09-22":true
   },
-  tasks: []
+  tasks: [],
+  notes: []
 };
 
 let data;
@@ -81,6 +82,9 @@ function normalizeData(saved){
   result.expenseHistory = saved.expenseHistory || {};
   result.workedDays = saved.workedDays || {};
   result.tasks = Array.isArray(saved.tasks) ? saved.tasks : [];
+  result.notes = Array.isArray(saved.notes) ? saved.notes : [];
+  const bikePayment = result.payments.find(p => p.id === "bike");
+  if(bikePayment) bikePayment.amount = 213;
   result.paidPayments = saved.paidPayments || {};
 
   // Mantém a alteração solicitada para o ar condicionado.
@@ -492,15 +496,12 @@ function renderCalendar(){
   document.querySelector("#saturdayTotal").textContent = money(saturdays);
   document.querySelector("#calendarTotal").textContent = money(monthTotal);
 
+  const currentPrefix = `${currentMonthKey()}-`;
   document.querySelector("#workTotal").textContent =
-    money(Object.keys(data.workedDays).reduce((total,key) => {
+    money(Object.keys(data.workedDays).filter(key => key.startsWith(currentPrefix)).reduce((total,key) => {
       const [y,m,d] = key.split("-").map(Number);
       const weekday = new Date(y,m - 1,d).getDay();
-
-      return total + (
-        weekday === 6 ? 50 :
-        weekday === 0 ? 0 : 30
-      );
+      return total + (weekday === 6 ? 50 : weekday === 0 ? 0 : 30);
     },0));
 }
 
@@ -516,26 +517,23 @@ document.querySelector("#nextMonth").addEventListener("click", () => {
 
 function renderTasks(){
   const box = document.querySelector("#tasks");
-
-  if(!data.tasks.length){
-    box.innerHTML = "<p>Nenhuma tarefa adicionada.</p>";
-    return;
-  }
-
+  if(!data.tasks.length){ box.innerHTML = "<p>Nenhuma tarefa adicionada.</p>"; return; }
   box.innerHTML = data.tasks.map(task => `
     <div class="task ${task.done ? "done" : ""}" data-task="${task.id}">
-      <span>${escapeHTML(task.text)}</span>
-    </div>
-  `).join("");
-
-  document.querySelectorAll("[data-task]").forEach(el => {
-    el.addEventListener("click", () => {
-      const task = data.tasks.find(t => t.id === el.dataset.task);
-      if(task) task.done = !task.done;
-      saveData();
-      renderTasks();
-    });
-  });
+      <span class="task-text">${escapeHTML(task.text)}</span>
+      ${task.done ? '<span class="task-check" aria-label="Concluída">✅</span>' : ''}
+      <button type="button" class="task-delete" data-delete-task="${task.id}" aria-label="Apagar tarefa">X</button>
+    </div>`).join("");
+  box.querySelectorAll("[data-task]").forEach(el => el.addEventListener("click", e => {
+    if(e.target.closest("[data-delete-task]")) return;
+    const task = data.tasks.find(t => t.id === el.dataset.task);
+    if(task) task.done = !task.done;
+    saveData(); renderTasks();
+  }));
+  box.querySelectorAll("[data-delete-task]").forEach(btn => btn.addEventListener("click", () => {
+    data.tasks = data.tasks.filter(t => t.id !== btn.dataset.deleteTask);
+    saveData(); renderTasks();
+  }));
 }
 
 document.querySelector("#addTask").addEventListener("click", addTask);
@@ -560,6 +558,68 @@ function addTask(){
   saveData();
   renderTasks();
 }
+
+let editingNoteId = null;
+
+const openedNotes = new Set();
+function renderNotes(){
+  const box = document.querySelector("#notes");
+  if(!data.notes.length){ box.innerHTML = '<p>Nenhuma anotação ainda. Crie sua primeira nota acima.</p>'; return; }
+  box.innerHTML = data.notes.map(note => {
+    const opened = openedNotes.has(note.id);
+    return `<article class="note-card">
+      <h3>${escapeHTML(note.title || "Sem título")}</h3>
+      <div class="note-content ${opened ? "" : "hidden"}"><p>${escapeHTML(note.content).replace(/\n/g,"<br>")}</p></div>
+      <div class="note-actions">
+        <button type="button" data-toggle-note="${note.id}">${opened ? "Fechar nota" : "Abrir nota"}</button>
+        <button type="button" data-edit-note="${note.id}">Editar</button>
+        <button type="button" class="note-delete" data-delete-note="${note.id}">Excluir</button>
+      </div>
+    </article>`;
+  }).join("");
+  box.querySelectorAll("[data-toggle-note]").forEach(btn => btn.addEventListener("click", () => {
+    const id = btn.dataset.toggleNote;
+    if(openedNotes.has(id)) openedNotes.delete(id); else openedNotes.add(id);
+    renderNotes();
+  }));
+  box.querySelectorAll("[data-edit-note]").forEach(button => button.addEventListener("click", () => {
+    const note = data.notes.find(item => item.id === button.dataset.editNote);
+    if(!note) return;
+    editingNoteId = note.id;
+    document.querySelector("#noteTitle").value = note.title;
+    document.querySelector("#noteContent").value = note.content;
+    document.querySelector("#saveNote").textContent = "Atualizar anotação";
+    document.querySelector("#noteTitle").focus();
+  }));
+  box.querySelectorAll("[data-delete-note]").forEach(button => button.addEventListener("click", () => {
+    data.notes = data.notes.filter(item => item.id !== button.dataset.deleteNote);
+    openedNotes.delete(button.dataset.deleteNote);
+    if(editingNoteId === button.dataset.deleteNote) resetNoteForm();
+    saveData(); renderNotes();
+  }));
+}
+
+function resetNoteForm(){
+  editingNoteId = null;
+  document.querySelector("#noteTitle").value = "";
+  document.querySelector("#noteContent").value = "";
+  document.querySelector("#saveNote").textContent = "Salvar anotação";
+}
+
+document.querySelector("#saveNote").addEventListener("click", () => {
+  const title = document.querySelector("#noteTitle").value.trim();
+  const content = document.querySelector("#noteContent").value.trim();
+  if(!title && !content) return;
+  if(editingNoteId){
+    const note = data.notes.find(item => item.id === editingNoteId);
+    if(note){ note.title = title || "Sem título"; note.content = content; }
+  }else{
+    data.notes.unshift({id:Date.now().toString(), title:title || "Sem título", content});
+  }
+  saveData();
+  resetNoteForm();
+  renderNotes();
+});
 
 let calcExpression = "";
 let calcJustEvaluated = false;
@@ -712,6 +772,7 @@ function renderAll(){
   renderExpenses();
   renderCalendar();
   renderTasks();
+  renderNotes();
   renderCalculator();
 }
 
